@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1e5c46" />
+    <meta
+      name="description"
+      content="좋은 물건의 다음 주인을 찾는 라이브 경매. 관심 상품을 발견하고, 판매자와 이야기하며 거래 흐름을 체험해 보세요."
+    />
+    <title>라이브 경매 · 좋은 물건의 다음 주인</title>
+    <link rel="stylesheet" href="styles/tokens.css" />
+    <link rel="stylesheet" href="styles/components.css" />
+    <link rel="stylesheet" href="styles/marketplace.css" />
+    <link rel="stylesheet" href="styles/account-chat.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">본문으로 건너뛰기</a>
+    <div class="demo-ribbon">
+      <span>PROTOTYPE</span> 직접 둘러보고, 입찰하고, 이야기해 보세요.
+      <button id="demo-info">체험 안내</button>
+    </div>
+    <header class="site-header">
+      <div class="header-inner">
+        <button class="brand" id="brand-home" aria-label="라이브 경매 홈">
+          <span class="brand-mark"><span></span><span></span><span></span></span
+          >라이브 경매<span class="brand-dot"></span>
+        </button>
+        <nav id="desktop-nav" class="desktop-nav" aria-label="주 메뉴"></nav>
+        <div class="header-actions">
+          <button
+            class="icon-button"
+            id="header-notifications"
+            aria-label="알림"
+          ></button
+          ><button
+            class="icon-button"
+            id="header-profile"
+            aria-label="내 정보"
+          ></button>
+        </div>
+      </div>
+    </header>
+    <main id="main-content" class="main-shell">
+      <section id="view-home" class="view-section"></section>
+      <section id="view-likes" class="view-section" hidden></section>
+      <section id="view-create" class="view-section" hidden></section>
+      <section id="view-detail" class="view-section" hidden></section>
+      <section id="view-profile" class="view-section" hidden></section>
+      <section id="view-seller" class="view-section" hidden></section>
+      <section id="view-chat" class="view-section" hidden></section>
+      <section id="view-support" class="view-section" hidden></section>
+    </main>
+    <footer class="site-footer">
+      <span class="footer-brand">라이브 경매</span
+      ><span>좋은 물건의 다음 이야기.</span
+      ><button id="footer-support">고객센터</button
+      ><small>데모 상품과 이미지 · 실제 거래가 발생하지 않습니다.</small>
+    </footer>
+    <nav
+      id="bottom-nav-root"
+      class="bottom-nav"
+      aria-label="모바일 주 메뉴"
+    ></nav>
+    <button
+      id="assistant-button"
+      class="assistant-button"
+      aria-label="거래 도우미 열기"
+    ></button>
+    <div
+      id="toast-container"
+      class="toast-container"
+      role="status"
+      aria-live="polite"
+    ></div>
+    <noscript>라이브 경매를 사용하려면 JavaScript를 활성화해 주세요.</noscript>
+    <script src="js/data.js"></script>
+    <script src="app/seed.js"></script>
+    <script src="app/helpers.js"></script>
+    <script src="app/icons.js"></script>
+    <script src="app/store.js"></script>
+    <script src="app/ui.js"></script>
+    <script src="app/router.js"></script>
+    <script src="app/features/account.js"></script>
+    <script src="app/features/safety.js"></script>
+    <script src="app/features/trades.js"></script>
+    <script src="app/features/bidding.js"></script>
+    <script src="app/views/home.js"></script>
+    <script src="app/views/likes.js"></script>
+    <script src="app/views/create.js"></script>
+    <script src="app/views/detail.js"></script>
+    <script src="app/views/profile.js"></script>
+    <script src="app/views/seller.js"></script>
+    <script src="app/views/chat.js"></script>
+    <script src="app/views/support.js"></script>
+    <script src="app/main.js"></script>
+  </body>
+</html>

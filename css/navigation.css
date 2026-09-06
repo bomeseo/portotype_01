@@ -1,0 +1,54 @@
+/* 하단 네비게이션 바 (홈 / 경매 찾기 / 경매 올리기 / 내정보) */
+
+.bottom-nav-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 68px;
+  background-color: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 40;
+  padding-bottom: 6px;
+}
+
+.nav-item-btn {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: var(--text-muted);
+  cursor: pointer;
+  width: 68px;
+  transition: all 0.2s ease;
+}
+
+.nav-item-btn .nav-icon {
+  font-size: 20px;
+  transition: transform 0.2s ease;
+}
+
+.nav-item-btn .nav-icon .ic {
+  width: 23px;
+  height: 23px;
+}
+
+.nav-item-btn .nav-text {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.nav-item-btn.active {
+  color: var(--primary);
+}
+
+.nav-item-btn.active .nav-icon {
+  transform: scale(1.1);
+}

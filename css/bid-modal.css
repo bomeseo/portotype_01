@@ -1,0 +1,201 @@
+/* 입찰 바텀시트 */
+
+.modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(31, 29, 26, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s;
+}
+
+.modal-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.bid-bottom-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-surface);
+  border-radius: 28px 28px 0 0;
+  padding: 16px 22px 32px;
+  box-shadow: var(--shadow-xl);
+  z-index: 101;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-backdrop.open .bid-bottom-sheet {
+  transform: translateY(0);
+}
+
+.sheet-handle-bar {
+  width: 44px;
+  height: 5px;
+  background-color: #d3ccc1;
+  border-radius: var(--radius-full);
+  margin: 0 auto 16px;
+}
+
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sheet-header h3 {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.sheet-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* 팝업 내부: 실시간 가격 표시 */
+.modal-price-display-card {
+  background-color: #26231f;
+  border-radius: var(--radius-md);
+  padding: 18px;
+  color: white;
+  text-align: center;
+  margin-bottom: 22px;
+  box-shadow: none;
+}
+
+.modal-price-display-card .live-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #a8a099;
+  margin-bottom: 4px;
+}
+
+.modal-price-display-card .current-live-amount {
+  font-size: 14px;
+  color: #c8c0b6;
+  margin-bottom: 12px;
+}
+
+.target-bid-amount-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.target-bid-amount-wrap .bid-tag {
+  font-size: 11px;
+  background: rgba(217, 80, 42, 0.25);
+  color: #f0a184;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.target-bid-amount {
+  font-size: 32px;
+  font-weight: 900;
+  color: #f2c14e;
+  letter-spacing: -0.5px;
+}
+
+.price-difference-info {
+  font-size: 12px;
+  color: #bdb3a6;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* 슬라이드식 가격 설정 */
+.slider-control-group {
+  margin-bottom: 24px;
+}
+
+.slider-header-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.custom-range-slider {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--border-color);
+  outline: none;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.custom-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(40, 33, 25, 0.25), 0 0 0 3px white;
+  transition: transform 0.1s ease;
+}
+
+.custom-range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.custom-range-slider::-webkit-slider-thumb:active {
+  transform: scale(1.2);
+  background: var(--primary-hover);
+}
+
+/* 빠른 단위 증액 버튼들 */
+.quick-step-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.step-pill-btn {
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  padding: 8px 0;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.step-pill-btn:hover {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary-border);
+}
+
+.step-pill-btn:active {
+  transform: scale(0.95);
+}

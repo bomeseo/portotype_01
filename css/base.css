@@ -1,0 +1,164 @@
+/* 공통 변수 · 리셋 · 앱 뼈대(디바이스 프레임, 스크롤 영역, 토스트) */
+
+:root {
+  /* 브랜드: 딥 그린(입찰/확정) + 주홍(라이브/마감) */
+  --primary: #1e5c46;
+  --primary-hover: #164434;
+  --primary-light: #e9f0ec;
+  --primary-border: #c3d4cb;
+
+  --accent-red: #d9502a;
+  --accent-red-light: #fcefe9;
+
+  --bg-app: #f7f5f2;
+  --bg-surface: #ffffff;
+  --bg-subtle: #efece7;
+
+  --text-main: #1f1d1a;
+  --text-secondary: #56514a;
+  --text-muted: #9b948a;
+
+  --border-color: #e4e0d9;
+  --border-subtle: #f0ede8;
+
+  --shadow-sm: 0 1px 2px rgba(40, 33, 25, 0.06);
+  --shadow-lg: 0 8px 22px rgba(40, 33, 25, 0.12);
+  --shadow-xl: 0 -6px 40px rgba(40, 33, 25, 0.18);
+
+  --radius-sm: 6px;
+  --radius-md: 11px;
+  --radius-full: 999px;
+
+  --app-max-width: 440px;
+}
+
+svg { display: block; }
+
+.ic {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  background-color: #26231f;
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
+  overflow-x: hidden;
+}
+
+/* 디바이스 프레임 & 레이아웃 컨테이너 */
+
+.device-container {
+  width: 100%;
+  max-width: var(--app-max-width);
+  height: 900px;
+  max-height: 94vh;
+  background-color: var(--bg-app);
+  border-radius: 44px;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6), 0 0 0 12px #34302a;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 앱 메인 뷰 스크롤 영역 */
+.app-view-port {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  scroll-behavior: smooth;
+}
+
+.app-view-port::-webkit-scrollbar {
+  display: none;
+}
+
+/* SPA 화면 뷰 (Home, Detail, Search, Create, Profile) */
+.view-section {
+  display: none;
+  min-height: 100%;
+  padding-bottom: 90px;
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.view-section.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 토스트 알림 메시지 */
+.toast-container {
+  position: absolute;
+  top: 56px;
+  left: 16px;
+  right: 16px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast-msg {
+  background-color: rgba(31, 29, 26, 0.95);
+  color: white;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(8px);
+  animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1), toastOut 0.3s ease 2.7s forwards;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-12px); }
+}
+
+/* 반응형 및 데스크톱 프레임 제어 */
+
+@media (max-width: 480px) {
+  body {
+    padding: 0;
+    background-color: var(--bg-app);
+  }
+
+  .device-container {
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}

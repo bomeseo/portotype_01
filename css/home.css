@@ -1,0 +1,135 @@
+/* 홈 화면: 헤더, 검색창, 카테고리 칩, 섹션 타이틀 */
+
+.app-header {
+  position: sticky;
+  top: 0;
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color);
+  z-index: 30;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.header-brand .live-dot {
+  width: 9px;
+  height: 9px;
+  background-color: var(--accent-red);
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(217, 80, 42, 0.6);
+  animation: pulse-red 1.8s infinite;
+}
+
+@keyframes pulse-red {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(217, 80, 42, 0.6); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 7px rgba(217, 80, 42, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(217, 80, 42, 0); }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 검색바 */
+.search-box-container {
+  padding: 10px 16px;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  padding: 10px 16px;
+  gap: 10px;
+}
+
+.search-input-wrapper input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+.search-input-wrapper .ic {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+}
+
+/* 카테고리 칩 */
+.category-chips {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px 14px;
+  overflow-x: auto;
+}
+
+.category-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chip-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chip-btn.active {
+  background-color: var(--text-main);
+  color: white;
+  border-color: var(--text-main);
+}
+
+/* 경매 목록 헤더 */
+.section-title-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 18px;
+}
+
+.section-title-bar h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.section-title-bar .live-badge {
+  background-color: var(--accent-red-light);
+  color: var(--accent-red);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+}

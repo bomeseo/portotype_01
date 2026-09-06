@@ -1,0 +1,65 @@
+/* 경매 올리기(등록) 화면: 폼과 사진 업로드 박스 */
+
+.create-form {
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.form-input, .form-textarea, .form-select {
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  background-color: var(--bg-surface);
+  outline: none;
+  color: var(--text-main);
+}
+
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.form-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.image-upload-preview-box {
+  width: 100%;
+  height: 130px;
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--bg-subtle);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.image-upload-preview-box .ic {
+  width: 26px;
+  height: 26px;
+}
+
+.image-upload-preview-box span {
+  font-size: 13px;
+  font-weight: 500;
+}

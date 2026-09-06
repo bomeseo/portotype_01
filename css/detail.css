@@ -1,0 +1,327 @@
+/* 경매 상세 화면 */
+
+.detail-nav-bar {
+  position: sticky;
+  top: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color);
+  z-index: 30;
+}
+
+.detail-nav-bar .nav-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* 상세 상단 대형 이미지 */
+.detail-gallery-container {
+  width: 100%;
+  height: 320px;
+  position: relative;
+  background-color: #26231f;
+}
+
+.detail-gallery-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery-indicators {
+  position: absolute;
+  bottom: 14px;
+  right: 16px;
+  background: rgba(31, 29, 26, 0.72);
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(4px);
+}
+
+.live-timer-floating {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  background: var(--accent-red);
+  color: white;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 3px 10px rgba(217, 80, 42, 0.3);
+}
+
+/* 상세 컨텐츠 본문 */
+.detail-content-body {
+  padding: 18px 18px 24px;
+  background-color: var(--bg-surface);
+}
+
+/* 판매자의 정보 */
+.seller-profile-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background-color: var(--bg-subtle);
+  border-radius: var(--radius-md);
+  margin-bottom: 18px;
+}
+
+.seller-profile-card .seller-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.seller-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+  box-shadow: var(--shadow-sm);
+}
+
+.seller-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.seller-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.verified-badge {
+  font-size: 10px;
+  background-color: var(--primary-light);
+  color: var(--primary);
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.seller-location {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.manner-temp-box {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--accent-red);
+}
+
+.review-count {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* 거래 희망 방식 & 안심 에스크로 카드 */
+.trade-method-box {
+  background-color: var(--bg-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+
+.safety-escrow-card {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-bottom: 18px;
+  color: var(--text-muted);
+}
+
+.safety-escrow-card .ic {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.safety-escrow-card p {
+  font-size: 12px;
+}
+
+/* 상품 정보 */
+.detail-product-info {
+  margin-bottom: 22px;
+}
+
+.detail-item-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.35;
+  margin-bottom: 12px;
+}
+
+.detail-price-box {
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.detail-price-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.live-price-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-red);
+}
+
+.bid-count-inline {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.detail-current-price {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--text-main);
+  letter-spacing: -0.5px;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.detail-current-price.price-updated {
+  color: var(--accent-red);
+  transform: scale(1.04);
+}
+
+.detail-sub-prices {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* 상세 설명 */
+.detail-description-section {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 16px;
+  margin-bottom: 24px;
+}
+
+.detail-description-text {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  white-space: pre-line;
+}
+
+/* 실시간 입찰 히스토리 로그 섹션 래퍼 */
+.bid-history-section {
+  background-color: var(--bg-surface);
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 16px;
+}
+
+/* 상세 화면 하단 고정 입찰 바 */
+.detail-bottom-bar {
+  position: absolute;
+  bottom: 68px;
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  padding: 10px 18px;
+  border-top: 1px solid var(--border-color);
+  display: none;
+  align-items: center;
+  gap: 12px;
+  z-index: 38;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.device-container.in-detail .detail-bottom-bar {
+  display: flex;
+}
+
+#view-detail {
+  padding-bottom: 145px;
+}
+
+.like-toggle-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.like-toggle-btn .ic {
+  width: 21px;
+  height: 21px;
+}
+
+.like-toggle-btn.liked {
+  color: var(--accent-red);
+  background-color: var(--accent-red-light);
+  border-color: #f0cbbc;
+}
+
+.like-toggle-btn.liked .ic {
+  fill: currentColor;
+}
+
+.btn-open-bid-modal {
+  flex: 1;
+  height: 48px;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: none;
+  transition: all 0.2s ease;
+}
+
+.btn-open-bid-modal:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-open-bid-modal:active {
+  transform: scale(0.98);
+}

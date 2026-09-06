@@ -1,0 +1,41 @@
+/* 모바일 화면 상단 상태창 (시계 · 통신사 · 배터리 아이콘) */
+
+.status-bar {
+  height: 44px;
+  background-color: transparent;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  z-index: 50;
+  flex-shrink: 0;
+}
+
+.status-time {
+  letter-spacing: -0.2px;
+}
+
+.status-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.status-icons svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.status-icons .carrier {
+  font-size: 10px;
+  letter-spacing: 0.3px;
+}
