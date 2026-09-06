@@ -10,9 +10,9 @@ const DemoData = {
       method: "둘 다",
       phone: "",
       verified: false,
-      interests: ["digital", "camera"],
-      publicHistory: true,
-      showOnline: true,
+      interests: [],
+      publicHistory: false,
+      showOnline: false,
       dnd: { enabled: false, start: "23:00", end: "08:00" },
       status: "active",
     };

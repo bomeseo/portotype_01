@@ -7,13 +7,16 @@ const Store = {
     try {
       const saved = JSON.parse(localStorage.getItem(this.key));
       this.data =
-        saved?.version === 3 && Array.isArray(saved.auctions) && saved.user
+        [3, 4].includes(saved?.version) &&
+        Array.isArray(saved.auctions) &&
+        saved.user
           ? saved
           : DemoData.create();
     } catch {
       this.data = DemoData.create();
       this.storageWarning = true;
     }
+    Membership.normalize();
     this.settleExpired();
   },
   save() {
@@ -41,14 +44,18 @@ const Store = {
       throw new Error("거래가 제한된 계정입니다. 고객센터에서 확인해 주세요.");
     if (!this.data.user.verified)
       throw new Error("먼저 내 정보에서 데모 전화번호 인증을 완료해 주세요.");
+    if (!this.data.user.onboardingComplete)
+      throw new Error("가입 정보를 먼저 완료해 주세요.");
   },
-  notify(title, text) {
+  notify(title, text, kind = "bids") {
+    if (this.data.user.alerts?.[kind] === false) return;
     this.data.notifications.unshift({
       id: uid(),
       title,
       text,
       at: Date.now(),
       read: false,
+      quiet: isDnd(this.data.user),
     });
   },
   like(id) {
@@ -118,6 +125,8 @@ const Store = {
           role: a.sellerId === "me" ? "seller" : "buyer",
           status: "협의 중",
           at: Date.now(),
+          agreement: null,
+          timeline: [],
         });
         this.notify(
           "경매가 마감됐어요",
@@ -156,6 +165,15 @@ const Store = {
       );
     if (!values.images.length || values.images.length > 5)
       throw new Error("상품 사진을 1~5장 등록해 주세요.");
+    if (!Number.isFinite(values.endTime) || values.endTime <= Date.now())
+      throw new Error("마감 시간을 확인해 주세요.");
+    if (
+      values.shippingFee !== undefined &&
+      (!Number.isSafeInteger(values.shippingFee) ||
+        values.shippingFee < 0 ||
+        values.shippingFee > 100000)
+    )
+      throw new Error("배송비는 0~100,000원으로 입력해 주세요.");
     if (!values.location.trim()) throw new Error("거래 지역을 입력해 주세요.");
     if (a) Object.assign(a, values, { currentPrice: values.startingPrice });
     else

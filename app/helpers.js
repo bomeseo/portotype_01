@@ -40,15 +40,18 @@ function day(at) {
   return new Date(at).toLocaleDateString("ko-KR", {
     month: "long",
     day: "numeric",
+    timeZone: "Asia/Seoul",
   });
 }
 function isDnd(member, date = new Date()) {
   if (!member?.dnd?.enabled) return false;
   const { start, end } = member.dnd;
-  const clock =
-    String(date.getHours()).padStart(2, "0") +
-    ":" +
-    String(date.getMinutes()).padStart(2, "0");
+  const clock = date.toLocaleTimeString("en-GB", {
+    timeZone: "Asia/Seoul",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
   return (
     start === end ||
     (start < end

@@ -6,6 +6,8 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("assistant-button").innerHTML =
     icon("bolt") + "<span>거래 도우미</span>";
   Nav.init({
+    onboarding: Onboarding,
+    trade: TradeView,
     home: HomeView,
     likes: LikesView,
     create: CreateView,
@@ -23,13 +25,24 @@ document.addEventListener("DOMContentLoaded", () => {
       .forEach((d) => (d.hidden = !Store.data.chats.some((c) => c.unread)));
   };
   document.addEventListener("state-changed", badges);
-  Nav.go("home", {}, true);
+  Onboarding.step = Store.data.signupDraft?.step || 0;
+  const shared = /^#product=(\d+)$/.exec(window.location?.hash || "");
+  Nav.go(
+    shared ? "detail" : Store.data.welcomeSeen ? "home" : "onboarding",
+    shared ? { id: Number(shared[1]) } : {},
+    true,
+  );
+  window.addEventListener("hashchange", () => {
+    const match = /^#product=(\d+)$/.exec(window.location.hash);
+    if (match) Nav.go("detail", { id: Number(match[1]) }, true);
+  });
   badges();
   setInterval(() => {
     const expired = Store.data.auctions.some(
       (a) => a.status === "active" && a.endTime <= Date.now(),
     );
     Store.settleExpired();
+    Discovery.remind();
     document.querySelectorAll("[data-timer]").forEach((el) => {
       const a = Store.auction(el.dataset.timer);
       if (a)
@@ -47,14 +60,23 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("demo-info").onclick = () =>
     UI.open(
       "프로토타입 안내",
-      '<p class="muted">이 사이트의 상품·판매자·평가·대화는 예시입니다. 입력한 정보는 이 브라우저에만 저장되며 실제 인증·조회·결제·거래가 발생하지 않습니다.</p><p class="muted">테스트 번호로 인증한 후 입찰·등록을 체험해 보세요. 내 정보의 거래 내역에는 거래 완료와 후기를 시험할 수 있는 예시가 있습니다.</p><button class="button secondary full" id="reset-demo">체험 데이터 초기화</button>',
+      '<p class="muted">이 사이트의 상품·판매자·평가·대화는 예시입니다. 입력한 정보는 이 브라우저에만 저장되며 실제 인증·조회·결제·거래가 발생하지 않습니다.</p><p class="muted">테스트 번호로 인증한 후 입찰·등록을 체험해 보세요. 내 정보의 거래 내역에는 거래 완료와 후기를 시험할 수 있는 예시가 있습니다.</p><div class="button-row"><button class="button" id="start-tutorial">초보자 따라하기</button><button class="button secondary" id="seller-demo">판매자 거래 체험</button></div><button class="button secondary full" id="reset-demo">체험 데이터 초기화</button>',
       (d) => {
+        d.querySelector("#start-tutorial").onclick = () =>
+          Membership.require(() => Tutorial.start());
+        d.querySelector("#seller-demo").onclick = () =>
+          Membership.require(() => Journey.demo("seller"));
         d.querySelector("#reset-demo").onclick = () =>
           UI.confirm(
             "체험 데이터를 초기화할까요?",
             "이 브라우저에 등록한 상품·사진·대화·설정을 지우고 처음 상태로 돌아갑니다.",
             () => {
+              Tutorial.stop();
+              Listing.current = null;
+              Onboarding.after = null;
+              Onboarding.step = 0;
               Store.data = DemoData.create();
+              Membership.normalize();
               Store.save();
               HomeView.filter = {
                 category: "all",

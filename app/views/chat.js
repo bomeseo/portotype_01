@@ -110,11 +110,14 @@ const ChatView = {
       Store.notify(
         "새 메시지",
         Store.member(room.peerId).name + "님에게 데모 답장이 도착했어요.",
+        "chat",
       );
       Store.save();
-      if (!isDnd(Store.data.user)) toast("데모 답장이 도착했어요.");
+      if (Store.data.user.alerts.chat && !isDnd(Store.data.user))
+        toast("데모 답장이 도착했어요.");
       this.render({ id: room.id });
     });
+    Assistant.chatTools();
     const messages = root.querySelector("#message-list");
     messages.scrollTop = messages.scrollHeight;
   },

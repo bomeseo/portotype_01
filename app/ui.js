@@ -4,8 +4,9 @@ const UI = {
     this.close();
     const d = document.createElement("dialog");
     d.className = "sheet";
+    d.setAttribute("aria-labelledby", "sheet-title");
     d.innerHTML =
-      '<div class="sheet-header"><h2>' +
+      '<div class="sheet-header"><h2 id="sheet-title">' +
       esc(title) +
       '</h2><button class="icon-button" data-close aria-label="닫기">' +
       icon("close") +
@@ -46,8 +47,8 @@ const UI = {
         d.querySelector("#cancel-action").onclick = () => this.close();
         d.querySelector("#confirm-action").onclick = () =>
           attempt(() => {
-            action();
             this.close();
+            action();
           });
       },
     );

@@ -1,30 +1,6 @@
 const Trades = {
   advance(id) {
-    const t = Store.data.trades.find((t) => t.id === id);
-    if (!t) return;
-    const flow = ["협의 중", "송금 표시", "전달·배송 중", "거래 완료"];
-    const next = flow[flow.indexOf(t.status) + 1];
-    if (!next) return;
-    UI.confirm(
-      next === "거래 완료"
-        ? "상품을 잘 받으셨나요?"
-        : next === "송금 표시"
-          ? "송금 표시를 남길까요?"
-          : "전달·배송 단계 체험",
-      next === "거래 완료"
-        ? "데모 거래를 완료하고 후기를 작성할 수 있습니다."
-        : next === "송금 표시"
-          ? "실제 이체나 입금 확인은 이루어지지 않습니다. 거래 단계만 변경됩니다."
-          : "프로토타입에서 판매자의 입금 확인과 상품 전달 단계를 체험합니다.",
-      () => {
-        t.status = next;
-        Store.notify("거래 상태가 변경됐어요", t.title + " · " + next);
-        Store.save();
-        ProfileView.render({ tab: "trades" });
-        toast(next + " 상태로 변경했어요.");
-      },
-      next === "거래 완료" ? "수령 확인" : "데모 단계 진행",
-    );
+    Membership.require(() => Nav.go("trade", { id }));
   },
   review(id) {
     const t = Store.data.trades.find((t) => t.id === id);
@@ -61,7 +37,9 @@ const Trades = {
           });
           Store.save();
           UI.close();
-          ProfileView.render({ tab: "trades" });
+          if (Nav.current === "trade") TradeView.render({ id });
+          else ProfileView.render({ tab: "trades" });
+          Tutorial.refresh();
           toast("후기를 남겼어요.");
         };
       },

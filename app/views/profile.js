@@ -164,26 +164,18 @@ const ProfileView = {
               '</h3><p class="trade-amount">' +
               money(t.amount) +
               '</p><div class="trade-progress">' +
-              ["협의 중", "송금 표시", "전달·배송 중", "거래 완료"]
+              Journey.flow
                 .map(
                   (s, i) =>
                     '<span class="' +
-                    (i <=
-                    [
-                      "협의 중",
-                      "송금 표시",
-                      "전달·배송 중",
-                      "거래 완료",
-                    ].indexOf(t.status)
-                      ? "done"
-                      : "") +
+                    (i <= Journey.flow.indexOf(t.status) ? "done" : "") +
                     '">' +
                     s +
                     "</span>",
                 )
                 .join("") +
               '</div><div class="button-row"><button class="button secondary" data-trade-chat="' +
-              t.auctionId +
+              t.id +
               '">' +
               icon("chat") +
               "거래 채팅</button>" +
@@ -196,11 +188,7 @@ const ProfileView = {
                 : '<button class="button" data-advance="' +
                   t.id +
                   '">' +
-                  ({
-                    "협의 중": "송금 표시",
-                    "송금 표시": "전달·배송 체험",
-                    "전달·배송 중": "수령 확인",
-                  }[t.status] || "다음 단계") +
+                  "거래 진행 보기" +
                   "</button>") +
               "</div></article>",
           )
@@ -223,9 +211,10 @@ const ProfileView = {
           (b) =>
             (b.onclick = () =>
               attempt(() =>
-                Nav.go("chat", { id: Store.chat(b.dataset.tradeChat).id }),
+                Nav.go("chat", { id: Journey.room(b.dataset.tradeChat).id }),
               )),
         );
     }
+    Discovery.profile();
   },
 };

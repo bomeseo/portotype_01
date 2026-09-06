@@ -177,7 +177,9 @@ const DetailView = {
     root
       .querySelector("#detail-chat")
       ?.addEventListener("click", () =>
-        attempt(() => Nav.go("chat", { id: Store.chat(a.id).id })),
+        Membership.require(() =>
+          attempt(() => Nav.go("chat", { id: Store.chat(a.id).id })),
+        ),
       );
     root
       .querySelector("#detail-bid")
@@ -205,11 +207,13 @@ const DetailView = {
         () => {
           a.endTime = Date.now() - 1;
           Store.settleExpired();
-          Nav.go("profile", { tab: "trades" });
+          const trade = Store.data.trades.find((t) => t.auctionId === a.id);
+          Nav.go("trade", { id: trade.id });
         },
         "마감 체험",
       ),
     );
+    Discovery.detail(a.id);
   },
   compare(a) {
     const q = encodeURIComponent([a.brand, a.model || a.title].join(" "));

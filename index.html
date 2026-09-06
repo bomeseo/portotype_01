@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="styles/components.css" />
     <link rel="stylesheet" href="styles/marketplace.css" />
     <link rel="stylesheet" href="styles/account-chat.css" />
+    <link rel="stylesheet" href="styles/flows.css" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">본문으로 건너뛰기</a>
@@ -42,6 +43,8 @@
       </div>
     </header>
     <main id="main-content" class="main-shell">
+      <section id="view-onboarding" class="view-section" hidden></section>
+      <section id="view-trade" class="view-section" hidden></section>
       <section id="view-home" class="view-section"></section>
       <section id="view-likes" class="view-section" hidden></section>
       <section id="view-create" class="view-section" hidden></section>
@@ -81,6 +84,11 @@
     <script src="app/store.js"></script>
     <script src="app/ui.js"></script>
     <script src="app/router.js"></script>
+    <script src="app/features/membership.js"></script>
+    <script src="app/features/journey.js"></script>
+    <script src="app/features/tutorial.js"></script>
+    <script src="app/features/assistant.js"></script>
+    <script src="app/features/listing.js"></script>
     <script src="app/features/account.js"></script>
     <script src="app/features/safety.js"></script>
     <script src="app/features/trades.js"></script>
@@ -93,6 +101,9 @@
     <script src="app/views/seller.js"></script>
     <script src="app/views/chat.js"></script>
     <script src="app/views/support.js"></script>
+    <script src="app/views/onboarding.js"></script>
+    <script src="app/views/trade.js"></script>
+    <script src="app/features/discovery.js"></script>
     <script src="app/main.js"></script>
   </body>
 </html>

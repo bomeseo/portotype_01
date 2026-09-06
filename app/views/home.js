@@ -113,6 +113,7 @@ const HomeView = {
         }),
     );
     this.renderList();
+    Discovery.mount();
   },
   renderList() {
     const f = this.filter;
@@ -132,7 +133,7 @@ const HomeView = {
           .toLowerCase()
           .includes(f.query.trim().toLowerCase()),
     );
-    if (f.mode === "for-you")
+    if (f.mode === "for-you" && Store.data.user.personalization)
       items = items.filter((a) =>
         Store.data.user.interests.includes(a.category),
       );
@@ -150,7 +151,13 @@ const HomeView = {
     document.getElementById("catalog-count").textContent =
       items.length +
       "개의 상품" +
-      (f.mode === "top" ? " · 데모 관심·입찰·조회 기반 순위" : "");
+      (f.mode === "top"
+        ? " · 데모 관심·입찰·조회 기반 순위"
+        : f.mode === "for-you"
+          ? Store.data.user.personalization
+            ? " · 내가 고른 관심 카테고리 기준"
+            : " · 추천 설정이 꺼져 있어 전체 상품을 보여드려요"
+          : "");
     const grid = document.getElementById("product-grid");
     grid.innerHTML = items.length
       ? UI.cards(items, { ranking: f.mode === "top" })
