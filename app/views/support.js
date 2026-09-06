@@ -43,7 +43,7 @@ const SupportView = {
       icon("chat") +
       '<h3>1:1 문의</h3><p>거래 상황을 자세히 남겨주세요.<br>문의 내용은 이 브라우저에 저장됩니다.</p><button class="button full" id="support-contact">문의 작성</button><small>데모 고객센터 · 실제 상담 미연결</small></div><div class="contact-card subdued">' +
       icon("help") +
-      '<h3>거래 도우미</h3><p>상품 확인, 질문 초안, 예산과 거래 단계를 안내해요.</p><button class="button secondary full" id="support-assistant">도우미에게 물어보기</button></div></aside></div>';
+      '<h3>거래 도우미</h3><p>자주 묻는 질문에 바로 답해드려요.</p><button class="button secondary full" id="support-assistant">도우미에게 물어보기</button></div></aside></div>';
     UI.bindBack(root);
     root.querySelector("#support-contact").onclick = () => this.contact();
     root.querySelector("#support-assistant").onclick = () => this.assistant();
@@ -84,13 +84,11 @@ const SupportView = {
           "궁금한 점이 있으면 1:1 문의를 남겨주세요.",
         );
   },
-  contact(prefill = {}) {
+  contact() {
     UI.open(
       "1:1 문의",
       '<form id="ticket-form"><label class="field">문의 유형<select name="type"><option>거래·입찰</option><option>계정·인증</option><option>신고·차단</option><option>기타</option></select></label><label class="field">제목<input name="title" maxlength="100" required placeholder="어떤 도움이 필요하신가요?"></label><label class="field">문의 내용<textarea name="body" rows="6" maxlength="3000" minlength="5" required placeholder="상품명과 상황을 함께 적어주세요."></textarea></label><p class="field-hint">실제 운영자에게 전송되지 않는 데모 문의입니다.</p><button class="button full" type="submit">문의 접수</button></form>',
       (d) => {
-        d.querySelector('[name="title"]').value = prefill.title || "";
-        d.querySelector('[name="body"]').value = prefill.body || "";
         d.querySelector("#ticket-form").onsubmit = (e) => {
           e.preventDefault();
           const f = new FormData(e.target);
@@ -194,6 +192,65 @@ const SupportView = {
     );
   },
   assistant() {
-    Assistant.open();
+    UI.open(
+      "거래 도우미",
+      '<div class="assistant-intro"><span class="assistant-avatar">' +
+        icon("bolt") +
+        '</span><div><strong>무엇을 도와드릴까요?</strong><p>경매와 거래에 대해 편하게 물어보세요.</p></div></div><p class="field-hint">AI 연결 전, FAQ 기반으로 동작하는 데모 도우미입니다.</p><div class="assistant-prompts">' +
+        [
+          "입찰은 어떻게 해요?",
+          "상품을 수정하고 싶어요",
+          "사기가 의심돼요",
+          "방해금지 설정",
+        ]
+          .map(
+            (q) =>
+              '<button class="chip" data-prompt="' + q + '">' + q + "</button>",
+          )
+          .join("") +
+        '</div><div id="assistant-messages" class="assistant-messages" aria-live="polite"></div><form id="assistant-form" class="assistant-form"><label class="sr-only" for="assistant-input">도우미 질문</label><input id="assistant-input" placeholder="궁금한 내용을 입력해 주세요" maxlength="500" required><button class="send-button" aria-label="질문 보내기">' +
+        icon("send") +
+        '</button></form><button class="text-button full" id="assistant-escalate">해결되지 않았어요 · 고객센터 문의</button>',
+      (d) => {
+        const ask = (q) => {
+          const f = /수정|삭제|등록/.test(q)
+            ? this.faqs[2]
+            : /사기|신고|차단/.test(q)
+              ? this.faqs[3]
+              : /방해|알림|밤/.test(q)
+                ? this.faqs[4]
+                : /낙찰|결제|송금|계좌/.test(q)
+                  ? this.faqs[1]
+                  : /입찰|인증|경매/.test(q)
+                    ? this.faqs[0]
+                    : null;
+          const list = d.querySelector("#assistant-messages");
+          list.insertAdjacentHTML(
+            "beforeend",
+            '<div class="assistant-question">' +
+              esc(q) +
+              '</div><div class="assistant-answer">' +
+              esc(
+                f?.a ||
+                  "이 질문은 아직 안내하기 어려워요. 아래 고객센터 문의에 상황을 남겨주시면 문의 흐름을 체험할 수 있습니다.",
+              ) +
+              "</div>",
+          );
+          list.scrollTop = list.scrollHeight;
+        };
+        d.querySelectorAll("[data-prompt]").forEach(
+          (b) => (b.onclick = () => ask(b.dataset.prompt)),
+        );
+        d.querySelector("#assistant-form").onsubmit = (e) => {
+          e.preventDefault();
+          const input = d.querySelector("#assistant-input");
+          if (input.value.trim()) {
+            ask(input.value.trim());
+            input.value = "";
+          }
+        };
+        d.querySelector("#assistant-escalate").onclick = () => this.contact();
+      },
+    );
   },
 };

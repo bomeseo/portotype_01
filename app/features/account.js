@@ -74,7 +74,71 @@ const Account = {
     );
   },
   settings() {
-    Onboarding.start(true);
+    const u = Store.data.user;
+    UI.open(
+      "프로필과 거래 설정",
+      '<form id="settings-form"><label class="field">닉네임<input name="name" maxlength="20" required value="' +
+        esc(u.name) +
+        '"></label><label class="field">한 줄 소개<input name="bio" maxlength="100" value="' +
+        esc(u.bio) +
+        '"></label><div class="form-two"><label class="field">선호 거래 지역<input name="location" maxlength="80" required value="' +
+        esc(u.location) +
+        '"></label><label class="field">선호 거래 방식<select name="method">' +
+        ["둘 다", "직거래", "택배"]
+          .map(
+            (m) =>
+              "<option " +
+              (u.method === m ? "selected" : "") +
+              ">" +
+              m +
+              "</option>",
+          )
+          .join("") +
+        '</select></label></div><h3 class="form-section-title">나의 관심사</h3><div class="interest-options">' +
+        CATEGORIES.filter((c) => c.id !== "all")
+          .map(
+            (c) =>
+              '<label><input type="checkbox" name="interests" value="' +
+              c.id +
+              '" ' +
+              (u.interests.includes(c.id) ? "checked" : "") +
+              "><span>" +
+              c.name +
+              "</span></label>",
+          )
+          .join("") +
+        '</div><label class="switch-row"><span><strong>거래 내역 공개</strong><small>상품과 거래 완료 내역을 공개해요.</small></span><input type="checkbox" name="publicHistory" ' +
+        (u.publicHistory ? "checked" : "") +
+        '></label><label class="switch-row"><span><strong>접속 상태 공개</strong><small>온라인·최근 접속 상태를 보여줘요.</small></span><input type="checkbox" name="showOnline" ' +
+        (u.showOnline ? "checked" : "") +
+        '></label><button class="button full" type="submit">변경 내용 저장</button></form>',
+      (d) => {
+        d.querySelector("#settings-form").onsubmit = (e) => {
+          e.preventDefault();
+          const f = new FormData(e.target);
+          if (
+            !String(f.get("name")).trim() ||
+            !String(f.get("location")).trim()
+          ) {
+            toast("닉네임과 거래 지역을 입력해 주세요.");
+            return;
+          }
+          Object.assign(u, {
+            name: f.get("name").trim(),
+            bio: f.get("bio").trim(),
+            location: f.get("location").trim(),
+            method: f.get("method"),
+            interests: f.getAll("interests"),
+            publicHistory: f.has("publicHistory"),
+            showOnline: f.has("showOnline"),
+          });
+          Store.save();
+          UI.close();
+          ProfileView.render(Nav.params);
+          toast("설정을 저장했어요.");
+        };
+      },
+    );
   },
   quietHours() {
     const quiet = Store.data.user.dnd;

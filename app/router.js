@@ -43,7 +43,6 @@ const Nav = {
     if (!this.views[name]) return;
     if (!replace)
       this.history.push({ name: this.current, params: this.params });
-    if (this.current === "create") Listing.capture();
     UI.close();
     this.current = name;
     this.params = params;
@@ -72,14 +71,6 @@ const Nav = {
         seller: "판매자 정보",
         support: "고객센터",
       }[name] || "라이브 경매") + " · 좋은 물건의 다음 주인";
-    if (name === "create") Listing.mount(params.id);
-    if (name === "chat") Assistant.chatTools();
-    Tutorial.refresh();
-    if (window.history?.replaceState && window.location?.href) {
-      const url = new URL(window.location.href);
-      url.hash = name === "detail" ? "product=" + params.id : "";
-      window.history.replaceState(null, "", url);
-    }
     window.scrollTo(0, 0);
   },
   back() {

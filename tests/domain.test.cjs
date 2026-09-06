@@ -4,64 +4,6 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 const root = path.resolve(__dirname, "..");
-
-test("old version migration preserves existing identity, inventory and settings", () => {
-  const s = session();
-  s.run(
-    'Store.data.version=3;Store.data.user.name="이전회원";Store.data.user.verified=true;Store.data.user.onboardingComplete=false;Store.save()',
-  );
-  const b = session(s.records.get("live-auction-prototype-v3"));
-  assert.equal(b.run("Store.data.version"), 4);
-  assert.equal(b.run("Store.data.user.name"), "이전회원");
-  assert.equal(b.run("Store.data.user.verified"), true);
-  assert.equal(b.run("Store.data.auctions.length"), 6);
-  assert.equal(b.run("Store.data.user.onboardingComplete"), false);
-  assert.throws(() => b.run("Store.bid(1,850000)"), /가입/);
-});
-
-test("trade stages require the right actor, agreement and delivery record", () => {
-  const s = session();
-  s.run(
-    "Store.data.user.onboardingComplete=true;Store.data.user.verified=true",
-  );
-  assert.throws(() => s.run('Journey.next("trade-demo","buyer")'), /약속/);
-  s.run(
-    'Journey.agree("trade-demo",{method:"택배",place:"편의점 수령",when:"2030-01-01T12:00",fee:3500});Journey.accept("trade-demo")',
-  );
-  assert.throws(() => s.run('Journey.next("trade-demo","seller")'), /구매자/);
-  s.run('Journey.next("trade-demo","buyer")');
-  assert.throws(() => s.run('Journey.next("trade-demo","buyer")'), /판매자/);
-  s.run('Journey.next("trade-demo","seller")');
-  assert.throws(() => s.run('Journey.next("trade-demo","seller")'), /전달/);
-  s.run(
-    'Journey.next("trade-demo","seller","테스트택배 0000");Journey.next("trade-demo","buyer")',
-  );
-  assert.equal(s.run('Journey.get("trade-demo").status'), "거래 완료");
-  assert.throws(() => s.run('Journey.next("trade-demo","buyer")'), /진행/);
-});
-
-test("cancellation freezes transaction and does not claim any refund", () => {
-  const s = session();
-  s.run(
-    'Store.data.user.onboardingComplete=true;Store.data.user.verified=true;Journey.issue("trade-demo","취소 요청","거래 조건이 맞지 않습니다.")',
-  );
-  assert.throws(() => s.run('Journey.next("trade-demo","buyer")'), /진행/);
-  s.run('Journey.resolve("trade-demo","cancel")');
-  assert.equal(s.run('Journey.get("trade-demo").status'), "취소 완료");
-  assert.match(s.run("Store.data.tickets[0].answer"), /실제 환불은 발생하지/);
-});
-
-test("notification preference is enforced, and quiet hours keep silent inbox records", () => {
-  const s = session();
-  s.run(
-    "Store.data.notifications=[];Store.data.user.alerts.chat=false;Store.notify('채팅','메시지','chat')",
-  );
-  assert.equal(s.run("Store.data.notifications.length"), 0);
-  s.run(
-    'Store.data.user.dnd={enabled:true,start:"00:00",end:"00:00"};Store.notify("낙찰","거래")',
-  );
-  assert.equal(s.run("Store.data.notifications[0].quiet"), true);
-});
 function session(saved) {
   const records = new Map(saved ? [["live-auction-prototype-v3", saved]] : []);
   const context = vm.createContext({
@@ -90,8 +32,6 @@ function session(saved) {
     "app/helpers.js",
     "app/icons.js",
     "app/store.js",
-    "app/features/membership.js",
-    "app/features/journey.js",
   ])
     vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, {
       filename: file,
@@ -121,16 +61,12 @@ test("unverified members cannot bid", () => {
 });
 test("restricted members cannot bid", () => {
   const s = session();
-  s.run(
-    'Store.data.user.onboardingComplete=true;Store.data.user.verified=true;Store.data.user.status="banned"',
-  );
+  s.run('Store.data.user.verified=true;Store.data.user.status="banned"');
   assert.throws(() => s.run("Store.bid(1,850000)"), /제한/);
 });
 test("bid step and minimum are enforced, including stale amounts", () => {
   const s = session();
-  s.run(
-    "Store.data.user.onboardingComplete=true;Store.data.user.verified=true",
-  );
+  s.run("Store.data.user.verified=true");
   assert.throws(() => s.run("Store.bid(1,845000)"), /단위/);
   s.run("Store.bid(1,850000)");
   assert.throws(() => s.run("Store.bid(1,850000)"), /단위/);
@@ -139,23 +75,19 @@ test("bid step and minimum are enforced, including stale amounts", () => {
 });
 test("a seller cannot bid on their own product", () => {
   const s = session();
-  s.run(
-    "Store.data.user.onboardingComplete=true;Store.data.user.verified=true",
-  );
+  s.run("Store.data.user.verified=true");
   assert.throws(() => s.run("Store.bid(6,185000)"), /내 상품/);
 });
 test("blocked sellers cannot receive bids or new chats", () => {
   const s = session();
-  s.run(
-    'Store.data.user.onboardingComplete=true;Store.data.user.verified=true;Store.data.blocked.push("seller-1")',
-  );
+  s.run('Store.data.user.verified=true;Store.data.blocked.push("seller-1")');
   assert.throws(() => s.run("Store.bid(1,850000)"), /거래할 수/);
   assert.throws(() => s.run("Store.chat(1)"), /차단/);
 });
 test("expired auctions settle once and create one winning trade", () => {
   const s = session();
   s.run(
-    "Store.data.user.onboardingComplete=true;Store.data.user.verified=true;Store.bid(1,850000);Store.auction(1).endTime=Date.now()-1;Store.settleExpired();Store.settleExpired()",
+    "Store.data.user.verified=true;Store.bid(1,850000);Store.auction(1).endTime=Date.now()-1;Store.settleExpired();Store.settleExpired()",
   );
   assert.equal(s.run("Store.data.trades.filter(t=>t.auctionId===1).length"), 1);
   assert.equal(s.run("Store.auction(1).status"), "ended");
@@ -169,9 +101,7 @@ test("no-bid auctions become unsold without a trade", () => {
 });
 test("new products validate images, prices and ownership", () => {
   const s = session();
-  s.run(
-    "Store.data.user.onboardingComplete=true;Store.data.user.verified=true",
-  );
+  s.run("Store.data.user.verified=true");
   const values =
     '({title:"테스트 상품",description:"실사용 상품입니다",startingPrice:10000,minStep:1000,images:["test.jpg"],location:"성수역",endTime:Date.now()+3600000,category:"digital"})';
   s.run("Store.saveAuction(" + values + ")");
@@ -189,7 +119,7 @@ test("new products validate images, prices and ownership", () => {
 test("only own unbid products can be edited or deleted", () => {
   const s = session();
   s.run(
-    'Store.data.user.onboardingComplete=true;Store.data.user.verified=true;Store.saveAuction({...Store.auction(6),title:"수정된 상품"},6)',
+    'Store.data.user.verified=true;Store.saveAuction({...Store.auction(6),title:"수정된 상품"},6)',
   );
   assert.equal(s.run("Store.auction(6).title"), "수정된 상품");
   s.run("Store.auction(6).bidsCount=1");

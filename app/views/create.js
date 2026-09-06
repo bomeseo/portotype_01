@@ -2,7 +2,6 @@ const CreateView = {
   images: [],
   busy: false,
   render({ id } = {}) {
-    Listing.current = null;
     const a = id ? Store.auction(id) : null,
       root = document.getElementById("view-create");
     if (
@@ -135,7 +134,6 @@ const CreateView = {
           {
             ...v,
             startingPrice: Number(v.startingPrice),
-            shippingFee: v.method === "직거래" ? 0 : Number(v.shippingFee || 0),
             minStep: Number(v.minStep),
             endTime: a ? a.endTime : Date.now() + Number(v.duration) * 3600000,
             images: [...this.images],
@@ -152,7 +150,6 @@ const CreateView = {
     this.renderPhotos();
   },
   renderPhotos() {
-    if (Listing.current) Listing.capture();
     const grid = document.getElementById("upload-grid");
     if (!grid) return;
     grid.innerHTML =
