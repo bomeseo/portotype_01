@@ -70,8 +70,7 @@ const ChatView = {
     );
     if (!room) return;
     if (room.unread) {
-      room.unread = 0;
-      Store.save();
+      attempt(() => Store.mutate("readRoom", { id: room.id }));
     }
     const blocked = Store.isBlocked(room.peerId);
     root.querySelector("#chat-back").onclick = () => {
@@ -90,31 +89,26 @@ const ChatView = {
     root.querySelector("#message-form").onsubmit = (e) => {
       e.preventDefault();
       const input = root.querySelector("#message-input");
-      attempt(() => {
-        Store.send(room.id, input.value);
+      attempt(async () => {
+        const key =
+          this.pending?.text === input.value && this.pending?.roomId === room.id
+            ? this.pending.id
+            : uid();
+        this.pending = { id: key, text: input.value, roomId: room.id };
+        await Store.send(room.id, input.value, "text", key);
+        this.pending = null;
         input.value = "";
         this.render({ id: room.id });
         root.querySelector("#message-input")?.focus();
       });
     };
+    root.querySelector("#message-input").oncompositionstart = () => {
+      Live.composing = true;
+    };
+    root.querySelector("#message-input").oncompositionend = () => {
+      Live.composing = false;
+    };
     root.querySelector("#share-account").onclick = () => this.account(room);
-    root.querySelector("#demo-reply")?.addEventListener("click", () => {
-      if (blocked) return;
-      room.messages.push({
-        id: uid(),
-        mine: false,
-        text: "네, 확인했어요! 원하시는 거래 시간과 장소를 알려주세요. 상품 상태는 만나서 다시 확인하셔도 괜찮아요.",
-        at: Date.now(),
-        kind: "demo",
-      });
-      Store.notify(
-        "새 메시지",
-        Store.member(room.peerId).name + "님에게 데모 답장이 도착했어요.",
-      );
-      Store.save();
-      if (!isDnd(Store.data.user)) toast("데모 답장이 도착했어요.");
-      this.render({ id: room.id });
-    });
     const messages = root.querySelector("#message-list");
     messages.scrollTop = messages.scrollHeight;
   },
@@ -147,7 +141,7 @@ const ChatView = {
           icon("moon") +
           "현재 시간은 상대방이 지정한 방해금지 시간입니다.</div>"
         : "") +
-      '<div class="message-list" id="message-list"><p class="chat-date">데모 대화 · 실제 상대에게 전송되지 않아요</p>' +
+      '<div class="message-list" id="message-list"><p class="chat-date">상품과 거래 약속을 이 대화에서 확인해 주세요.</p>' +
       room.messages
         .map(
           (msg) =>
@@ -157,12 +151,11 @@ const ChatView = {
             (msg.kind === "account" ? "account-bubble" : "") +
             '">' +
             (msg.kind === "account"
-              ? "<strong>" + icon("shield") + "계좌 정보 · 데모</strong>"
+              ? "<strong>" + icon("shield") + "계좌 정보</strong>"
               : "") +
             "<p>" +
             esc(msg.text) +
             "</p>" +
-            (msg.kind === "demo" ? "<small>데모 답장</small>" : "") +
             '</div><span class="message-time">' +
             new Date(msg.at).toLocaleTimeString("ko-KR", {
               hour: "2-digit",
@@ -175,9 +168,7 @@ const ChatView = {
       (blocked ? "disabled" : "") +
       ">" +
       icon("plus") +
-      '계좌 전달</button><button class="text-button" id="demo-reply" ' +
-      (blocked ? "disabled" : "") +
-      '>데모 답장 받기</button></div><form id="message-form"><label class="sr-only" for="message-input">메시지</label><input id="message-input" maxlength="2000" autocomplete="off" placeholder="' +
+      '계좌 전달</button></div><form id="message-form"><label class="sr-only" for="message-input">메시지</label><input id="message-input" maxlength="2000" autocomplete="off" placeholder="' +
       (blocked
         ? "차단을 해제하면 메시지를 보낼 수 있어요."
         : "메시지를 입력해 주세요.") +
@@ -195,21 +186,21 @@ const ChatView = {
       "계좌 정보 전달",
       '<div class="notice">' +
         icon("shield") +
-        '<p>데모에는 실제 금융정보를 입력하지 마세요. 입력한 내용은 이 브라우저에만 저장됩니다.</p></div><form id="account-share-form"><label class="field">은행<input name="bank" maxlength="30" required placeholder="테스트 은행"></label><label class="field">계좌번호<input name="number" maxlength="30" inputmode="numeric" required placeholder="000-0000-0000"></label><label class="field">예금주<input name="holder" maxlength="30" required placeholder="테스트 사용자"></label><button class="button full" type="submit">대화방에 전달</button></form>',
+        '<p>계좌 정보는 이 대화 상대방에게 전달됩니다. 예금주와 거래 내용을 확인해 주세요.</p></div><form id="account-share-form"><label class="field">은행<input name="bank" maxlength="30" required placeholder="은행명"></label><label class="field">계좌번호<input name="number" maxlength="30" inputmode="numeric" required placeholder="000-0000-0000"></label><label class="field">예금주<input name="holder" maxlength="30" required placeholder="예금주"></label><button class="button full" type="submit">대화방에 전달</button></form>',
       (d) => {
         d.querySelector("#account-share-form").onsubmit = (e) => {
           e.preventDefault();
           const f = new FormData(e.target);
-          attempt(() => {
-            Store.send(
-              room.id,
-              f.get("bank") +
-                "\n" +
-                f.get("number") +
-                "\n예금주: " +
-                f.get("holder"),
-              "account",
-            );
+          attempt(async () => {
+            await Store.mutate("send", {
+              id: room.id,
+              text: "계좌 정보",
+              kind: "account",
+              requestId: uid(),
+              bank: f.get("bank"),
+              number: f.get("number"),
+              holder: f.get("holder"),
+            });
             UI.close();
             this.render({ id: room.id });
           });

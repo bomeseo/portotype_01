@@ -88,10 +88,10 @@ const DetailView = {
       '</button><div class="trust-line">' +
       icon("shield") +
       "<span>" +
-      (seller.verified ? "전화번호 인증 · 데모" : "전화번호 미인증") +
+      (seller.verified ? "전화번호 인증" : "전화번호 미인증") +
       '</span><button class="text-button" id="trust-open">거래 정보</button></div>' +
       (seller.fraud === "review"
-        ? '<div class="notice warning">신고 검토 중인 데모 판매자입니다. 거래 정보를 확인해 주세요.</div>'
+        ? '<div class="notice warning">신고 검토 중인 판매자입니다. 거래 정보를 확인해 주세요.</div>'
         : "") +
       '<div class="detail-actions">' +
       (mine
@@ -147,13 +147,9 @@ const DetailView = {
                 "</strong></div>",
             )
             .join("")
-        : '<p class="muted">아직 입찰이 없어요. 첫 입찰을 시작해 보세요.</p>') +
+        : '<p class="muted">내 최고 입찰 기록이 없습니다. 전체 입찰 수와 현재가는 위에서 확인해 주세요.</p>') +
       "</section>" +
-      (a.bidHistory[0]?.userId === "me" && !ended
-        ? '<button class="text-button demo-control" id="demo-end">' +
-          icon("clock") +
-          "데모: 지금 마감하고 낙찰 흐름 보기</button>"
-        : "") +
+      "" +
       "</div></div>";
     UI.bindBack(root);
     UI.bindCards(root);
@@ -177,7 +173,9 @@ const DetailView = {
     root
       .querySelector("#detail-chat")
       ?.addEventListener("click", () =>
-        attempt(() => Nav.go("chat", { id: Store.chat(a.id).id })),
+        attempt(async () =>
+          Nav.go("chat", { id: (await Store.chat(a.id)).id }),
+        ),
       );
     root
       .querySelector("#detail-bid")
@@ -189,8 +187,8 @@ const DetailView = {
       UI.confirm(
         "상품을 삭제할까요?",
         "목록에서 사라지며 되돌릴 수 없습니다.",
-        () => {
-          Store.deleteAuction(a.id);
+        async () => {
+          await Store.deleteAuction(a.id);
           Nav.go("profile");
           toast("상품을 삭제했어요.");
         },
@@ -198,18 +196,6 @@ const DetailView = {
       ),
     );
     root.querySelector("#compare-open").onclick = () => this.compare(a);
-    root.querySelector("#demo-end")?.addEventListener("click", () =>
-      UI.confirm(
-        "경매 마감 체험",
-        "현재 내 입찰로 마감하고 거래 내역을 만듭니다. 이 데모 경매는 다시 진행되지 않습니다.",
-        () => {
-          a.endTime = Date.now() - 1;
-          Store.settleExpired();
-          Nav.go("profile", { tab: "trades" });
-        },
-        "마감 체험",
-      ),
-    );
   },
   compare(a) {
     const q = encodeURIComponent([a.brand, a.model || a.title].join(" "));

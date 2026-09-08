@@ -150,7 +150,7 @@ const HomeView = {
     document.getElementById("catalog-count").textContent =
       items.length +
       "개의 상품" +
-      (f.mode === "top" ? " · 데모 관심·입찰·조회 기반 순위" : "");
+      (f.mode === "top" ? " · 관심·입찰 기반 순위" : "");
     const grid = document.getElementById("product-grid");
     grid.innerHTML = items.length
       ? UI.cards(items, { ranking: f.mode === "top" })

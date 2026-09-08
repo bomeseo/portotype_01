@@ -40,6 +40,14 @@ const Nav = {
       SupportView.assistant();
   },
   go(name, params = {}, replace = false) {
+    if (
+      ["create", "likes", "chat"].includes(name) &&
+      !Store.data.authenticated
+    ) {
+      name = "profile";
+      params = {};
+      toast("로그인 후 이용해 주세요.");
+    }
     if (!this.views[name]) return;
     if (!replace)
       this.history.push({ name: this.current, params: this.params });

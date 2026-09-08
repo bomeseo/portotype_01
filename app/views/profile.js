@@ -2,6 +2,10 @@ const ProfileView = {
   tab: "selling",
   render(params = {}) {
     if (params.tab) this.tab = params.tab;
+    if (!Store.data.authenticated) {
+      Live.loginPage();
+      return;
+    }
     const root = document.getElementById("view-profile"),
       u = Store.data.user;
     const selling = Store.data.auctions.filter(
@@ -24,7 +28,7 @@ const ProfileView = {
       '</p><span class="tag ' +
       (u.verified ? "green" : "") +
       '">' +
-      (u.verified ? "데모 전화번호 인증 완료" : "전화번호 미인증") +
+      (u.verified ? "전화번호 인증 완료" : "전화번호 미인증") +
       '</span><div class="profile-stats"><div><strong>' +
       selling.length +
       "</strong><span>판매 상품</span></div><div><strong>" +
@@ -51,7 +55,7 @@ const ProfileView = {
       icon("help") +
       "<span>고객센터</span>" +
       icon("arrow") +
-      '</button></div><p class="demo-footnote">프로토타입 · 이 브라우저에 저장됨<br>인증·거래·대화는 데모입니다.</p></aside><div class="account-content">' +
+      '</button></div><p class="demo-footnote">내 계정의 거래 정보가 서버에 저장됩니다.</p></aside><div class="account-content">' +
       (isDnd(u)
         ? '<div class="notice">' +
           icon("moon") +
@@ -79,7 +83,7 @@ const ProfileView = {
       "#profile-preferences",
     ).onclick = () => Account.settings();
     root.querySelector("#profile-verify").onclick = () =>
-      Account.verify(() => toast("데모 인증을 완료했어요."));
+      Account.verify(() => toast("인증을 완료했어요."));
     root.querySelector("#profile-quiet").onclick = () => Account.quietHours();
     root.querySelector("#profile-blocked").onclick = () => Safety.blockedList();
     root.querySelector("#profile-support").onclick = () => Nav.go("support");
@@ -90,6 +94,36 @@ const ProfileView = {
           this.render(Nav.params);
         }),
     );
+    const menu = root.querySelector(".settings-menu");
+    menu.insertAdjacentHTML(
+      "beforeend",
+      '<button id="profile-password">비밀번호 변경</button><button id="profile-logout">로그아웃</button>' +
+        (u.role === "admin"
+          ? '<button id="profile-admin">운영 관리</button>'
+          : ""),
+    );
+    root.querySelector("#profile-password").onclick = () => Account.password();
+    root
+      .querySelector(".account-card")
+      .insertAdjacentHTML(
+        "beforeend",
+        '<p class="field-hint">아이디: ' +
+          esc(u.username || u.email || "전화번호 로그인") +
+          "<br>거래 평점: " +
+          esc(u.rating ?? "아직 평가 없음") +
+          " · 후기 " +
+          (u.reviewCount || 0) +
+          "개</p>",
+      );
+    root.querySelector("#profile-logout").onclick = () =>
+      attempt(async () => {
+        await Store.mutate("logout");
+        ChatView.active = null;
+        Nav.go("home");
+      });
+    root
+      .querySelector("#profile-admin")
+      ?.addEventListener("click", () => Live.admin());
     const content = root.querySelector("#profile-content");
     if (this.tab === "selling") {
       content.innerHTML =
@@ -157,7 +191,6 @@ const ProfileView = {
               '">' +
               esc(t.status) +
               '</span><small class="muted">' +
-              (t.demo ? "체험용 거래 · " : "") +
               day(t.at) +
               "</small></div><h3>" +
               esc(t.title) +
@@ -193,15 +226,25 @@ const ProfileView = {
                   : '<button class="button" data-review="' +
                     t.id +
                     '">후기 남기기</button>'
-                : '<button class="button" data-advance="' +
-                  t.id +
-                  '">' +
-                  ({
-                    "협의 중": "송금 표시",
-                    "송금 표시": "전달·배송 체험",
-                    "전달·배송 중": "수령 확인",
-                  }[t.status] || "다음 단계") +
-                  "</button>") +
+                : !(
+                      (t.status === "송금 표시" && t.role === "seller") ||
+                      (["협의 중", "전달·배송 중"].includes(t.status) &&
+                        t.role === "buyer")
+                    )
+                  ? '<button class="button secondary" disabled>' +
+                    (t.status === "거래 중지"
+                      ? "거래 중지"
+                      : "상대방 확인 대기") +
+                    "</button>"
+                  : '<button class="button" data-advance="' +
+                    t.id +
+                    '">' +
+                    ({
+                      "협의 중": "송금 표시",
+                      "송금 표시": "전달·배송 확인",
+                      "전달·배송 중": "수령 확인",
+                    }[t.status] || "다음 단계") +
+                    "</button>") +
               "</div></article>",
           )
           .join("") +
@@ -217,15 +260,15 @@ const ProfileView = {
       content
         .querySelectorAll("[data-review]")
         .forEach((b) => (b.onclick = () => Trades.review(b.dataset.review)));
-      content
-        .querySelectorAll("[data-trade-chat]")
-        .forEach(
-          (b) =>
-            (b.onclick = () =>
-              attempt(() =>
-                Nav.go("chat", { id: Store.chat(b.dataset.tradeChat).id }),
-              )),
-        );
+      content.querySelectorAll("[data-trade-chat]").forEach(
+        (b) =>
+          (b.onclick = () =>
+            attempt(async () =>
+              Nav.go("chat", {
+                id: (await Store.chat(b.dataset.tradeChat)).id,
+              }),
+            )),
+      );
     }
   },
 };

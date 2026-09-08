@@ -45,8 +45,8 @@ const UI = {
       (d) => {
         d.querySelector("#cancel-action").onclick = () => this.close();
         d.querySelector("#confirm-action").onclick = () =>
-          attempt(() => {
-            action();
+          attempt(async () => {
+            await action();
             this.close();
           });
       },
@@ -142,13 +142,14 @@ const UI = {
       );
     root.querySelectorAll("[data-like]").forEach(
       (b) =>
-        (b.onclick = () => {
-          const liked = Store.like(b.dataset.like);
-          b.classList.toggle("liked", liked);
-          b.setAttribute("aria-pressed", liked);
-          b.setAttribute("aria-label", liked ? "찜 해제" : "찜하기");
-          if (Nav.current === "likes") LikesView.render();
-        }),
+        (b.onclick = () =>
+          attempt(async () => {
+            const liked = await Store.like(b.dataset.like);
+            b.classList.toggle("liked", liked);
+            b.setAttribute("aria-pressed", liked);
+            b.setAttribute("aria-label", liked ? "찜 해제" : "찜하기");
+            if (Nav.current === "likes") LikesView.render();
+          })),
     );
   },
 };

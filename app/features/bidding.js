@@ -1,6 +1,6 @@
 const Bidding = {
   open(id) {
-    attempt(() => {
+    attempt(async () => {
       Store.canTrade();
       const a = Store.auction(id);
       if (a.status !== "active" || a.endTime <= Date.now())
@@ -35,7 +35,7 @@ const Bidding = {
             .join("") +
           '</div><div class="notice">' +
           icon("shield") +
-          '<p>입찰자는 공개되지 않아요. 낙찰되면 판매자와 채팅으로 거래를 협의합니다.</p></div><p class="field-hint">데모 입찰이며 실제 결제는 발생하지 않습니다.</p><button class="button full" type="submit">입찰 확정</button></form>',
+          '<p>입찰자는 공개되지 않아요. 낙찰되면 판매자와 채팅으로 거래를 협의합니다.</p></div><p class="field-hint">입찰 확정으로 결제되지는 않습니다. 낙찰 후 거래를 진행해 주세요.</p><button class="button full" type="submit">입찰 확정</button></form>',
         (d) => {
           const input = d.querySelector("#bid-value");
           d.querySelectorAll("[data-step]").forEach(
@@ -48,8 +48,8 @@ const Bidding = {
           );
           d.querySelector("#bid-form").onsubmit = (e) => {
             e.preventDefault();
-            attempt(() => {
-              Store.bid(id, Number(input.value));
+            attempt(async () => {
+              await Store.bid(id, Number(input.value));
               UI.close();
               DetailView.render({ id });
               toast("최고 입찰자가 되었어요.");

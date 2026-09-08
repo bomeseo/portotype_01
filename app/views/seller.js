@@ -30,11 +30,11 @@ const SellerView = {
       icon("shield") +
       "<strong>" +
       (m.verified ? "인증 완료" : "미인증") +
-      "</strong><span>전화번호 · 데모</span></div><div>" +
+      "</strong><span>전화번호</span></div><div>" +
       icon("star") +
       "<strong>" +
       (m.rating || "신규") +
-      "</strong><span>판매자 평점 · 예시</span></div><div>" +
+      "</strong><span>거래 평점</span></div><div>" +
       icon("pin") +
       "<strong>" +
       esc(m.location) +
@@ -43,9 +43,11 @@ const SellerView = {
       '">' +
       icon("shield") +
       "<div><strong>" +
-      (m.fraud === "review"
-        ? "신고 검토 중 · 데모"
-        : "확인된 서비스 제재 없음 · 데모") +
+      (m.fraud === "confirmed"
+        ? "운영진이 사기를 확인하여 이용이 제한된 회원"
+        : m.fraud === "restricted"
+          ? "서비스 이용 제한 중"
+          : "외부 사기 조회 미연결") +
       '</strong><p>실제 외부 사기 조회 결과가 아닙니다. 신고 접수와 사기 확정은 구분됩니다.</p></div></div><div class="button-row">' +
       (id !== "me"
         ? '<button class="button secondary" id="seller-block">' +
@@ -63,11 +65,8 @@ const SellerView = {
           ? '<div class="product-grid compact">' +
             UI.cards(items) +
             "</div>" +
-            Store.data.trades
-              .filter(
-                (t) =>
-                  t.status === "거래 완료" && (id === "me" || t.peerId === id),
-              )
+            Store.data.publicTrades
+              .filter((t) => t.memberId === id)
               .map(
                 (t) =>
                   '<div class="option-row"><span>' +

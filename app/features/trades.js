@@ -10,20 +10,18 @@ const Trades = {
         ? "상품을 잘 받으셨나요?"
         : next === "송금 표시"
           ? "송금 표시를 남길까요?"
-          : "전달·배송 단계 체험",
+          : "전달·배송 확인",
       next === "거래 완료"
-        ? "데모 거래를 완료하고 후기를 작성할 수 있습니다."
+        ? "거래를 완료하고 후기를 작성할 수 있습니다."
         : next === "송금 표시"
           ? "실제 이체나 입금 확인은 이루어지지 않습니다. 거래 단계만 변경됩니다."
-          : "프로토타입에서 판매자의 입금 확인과 상품 전달 단계를 체험합니다.",
-      () => {
-        t.status = next;
-        Store.notify("거래 상태가 변경됐어요", t.title + " · " + next);
-        Store.save();
+          : "입금을 확인하고 상품을 전달하거나 배송했을 때 진행해 주세요.",
+      async () => {
+        await Store.mutate("advance", { id });
         ProfileView.render({ tab: "trades" });
         toast(next + " 상태로 변경했어요.");
       },
-      next === "거래 완료" ? "수령 확인" : "데모 단계 진행",
+      next === "거래 완료" ? "수령 확인" : "진행",
     );
   },
   review(id) {
@@ -42,7 +40,7 @@ const Trades = {
         esc(t.title) +
         '</p><form id="review-form"><label class="field">거래는 어떠셨나요?<select name="rating"><option value="5">★★★★★ 정말 좋았어요</option><option value="4">★★★★☆ 좋았어요</option><option value="3">★★★☆☆ 보통이에요</option><option value="2">★★☆☆☆ 아쉬웠어요</option><option value="1">★☆☆☆☆ 좋지 않았어요</option></select></label><label class="field">후기<textarea name="text" rows="4" minlength="5" maxlength="1000" required placeholder="다음 거래자에게 도움이 될 경험을 남겨주세요."></textarea></label><button type="submit" class="button full">후기 등록</button></form>',
       (d) => {
-        d.querySelector("#review-form").onsubmit = (e) => {
+        d.querySelector("#review-form").onsubmit = async (e) => {
           e.preventDefault();
           const f = new FormData(e.target);
           if (f.get("text").trim().length < 5) {
@@ -50,16 +48,16 @@ const Trades = {
             return;
           }
           if (Store.data.reviews.some((r) => r.tradeId === id)) return;
-          Store.data.reviews.unshift({
-            id: uid(),
-            tradeId: id,
-            sellerId: t.peerId,
-            author: Store.data.user.name,
-            rating: Number(f.get("rating")),
-            text: f.get("text").trim(),
-            at: Date.now(),
-          });
-          Store.save();
+          try {
+            await Store.mutate("review", {
+              id,
+              rating: Number(f.get("rating")),
+              text: f.get("text").trim(),
+            });
+          } catch (error) {
+            toast(error.message);
+            return;
+          }
           UI.close();
           ProfileView.render({ tab: "trades" });
           toast("후기를 남겼어요.");

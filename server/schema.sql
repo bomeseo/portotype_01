@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS bullty_records (
+  collection VARCHAR(32) NOT NULL,
+  id VARCHAR(64) NOT NULL,
+  payload JSON NOT NULL,
+  PRIMARY KEY (collection, id)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS bullty_lock (
+  id INT PRIMARY KEY
+) ENGINE=InnoDB;
+INSERT IGNORE INTO bullty_lock (id) VALUES (1);
+CREATE TABLE IF NOT EXISTS bullty_members (
+  id VARCHAR(64) PRIMARY KEY,
+  username VARCHAR(24) NULL UNIQUE,
+  email VARCHAR(254) NULL UNIQUE,
+  phone VARCHAR(20) NULL UNIQUE,
+  password_hash VARCHAR(255) NULL,
+  name VARCHAR(80) NOT NULL,
+  role VARCHAR(16) NOT NULL DEFAULT 'member',
+  status VARCHAR(16) NOT NULL DEFAULT 'active',
+  rating DECIMAL(3,2) NULL,
+  review_count INT NOT NULL DEFAULT 0,
+  profile JSON NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -5,4 +5,13 @@ dist/
 .env
 .env.*
 !.env.example
+bullty-config.php
+*.sqlite
+uploads/*
+!uploads/.htaccess
 
+# Local implementation memo contains a real credential.
+/agents.md
+admin-credentials.txt
+admin-bootstrap.sql
+bullty-private/

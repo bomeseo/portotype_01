@@ -1,5 +1,16 @@
-document.addEventListener("DOMContentLoaded", () => {
-  Store.init();
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    await Store.init();
+  } catch (error) {
+    document.getElementById("view-home").innerHTML = empty(
+      "서비스에 연결하지 못했어요",
+      error.message,
+      '<button class="button" id="retry-connection">다시 연결</button>',
+    );
+    document.getElementById("retry-connection").onclick = () =>
+      location.reload();
+    return;
+  }
   document.getElementById("header-notifications").innerHTML =
     icon("bell") + '<i id="notification-dot" class="unread-dot" hidden></i>';
   document.getElementById("header-profile").innerHTML = icon("user");
@@ -44,37 +55,5 @@ document.addEventListener("DOMContentLoaded", () => {
       Nav.views[Nav.current].render(Nav.params);
   }, 1000);
   document.getElementById("footer-support").onclick = () => Nav.go("support");
-  document.getElementById("demo-info").onclick = () =>
-    UI.open(
-      "프로토타입 안내",
-      '<p class="muted">이 사이트의 상품·판매자·평가·대화는 예시입니다. 입력한 정보는 이 브라우저에만 저장되며 실제 인증·조회·결제·거래가 발생하지 않습니다.</p><p class="muted">테스트 번호로 인증한 후 입찰·등록을 체험해 보세요. 내 정보의 거래 내역에는 거래 완료와 후기를 시험할 수 있는 예시가 있습니다.</p><button class="button secondary full" id="reset-demo">체험 데이터 초기화</button>',
-      (d) => {
-        d.querySelector("#reset-demo").onclick = () =>
-          UI.confirm(
-            "체험 데이터를 초기화할까요?",
-            "이 브라우저에 등록한 상품·사진·대화·설정을 지우고 처음 상태로 돌아갑니다.",
-            () => {
-              Store.data = DemoData.create();
-              Store.save();
-              HomeView.filter = {
-                category: "all",
-                sub: "전체",
-                query: "",
-                sort: "popular",
-                mode: "all",
-                method: "전체",
-              };
-              ChatView.active = null;
-              Nav.history = [];
-              Nav.go("home", {}, true);
-              toast("처음 상태로 돌아왔어요.");
-            },
-            "초기화",
-          );
-      },
-    );
-  if (Store.storageWarning)
-    toast(
-      "브라우저 저장소를 사용할 수 없어 변경 사항이 유지되지 않을 수 있어요.",
-    );
+  Live.start();
 });

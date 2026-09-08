@@ -1,0 +1,47 @@
+<?php
+declare(strict_types=1);
+require __DIR__.'/../server/domain.php';
+require __DIR__.'/../server/members.php';
+$count=0;
+function ok(bool $value,string $label):void{global $count;if(!$value)throw new RuntimeException($label);$count++;}
+function denied(callable $fn,string $label):void{try{$fn();}catch(DomainException){ok(true,$label);return;}throw new RuntimeException($label);}
+$db=['users'=>['seller'=>new_member('seller','판매자'),'buyer'=>new_member('buyer','구매자'),'other'=>new_member('other','다른 회원')]];
+$db['users']['seller']['passwordHash']='PRIVATE_PASSWORD_HASH';$db['users']['seller']['phone']='01099998888';
+$photo='uploads/'.str_repeat('a',32).'.jpg';$db['uploads'][$photo]=['uid'=>'seller'];
+$values=['title'=>'실제 상품','description'=>'상태를 기록한 상품 설명','location'=>'서울','category'=>'digital','subcategory'=>'헤드폰','brand'=>'','model'=>'','condition'=>'사용감 적음','method'=>'직거래','startingPrice'=>1000,'minStep'=>100,'duration'=>24,'images'=>[$photo]];
+$id=action($db,'seller','saveAuction',['values'=>$values]);ok($id===1,'first product');
+denied(fn()=>action($db,'other','saveAuction',['id'=>$id,'values'=>$values]),'ownership');
+denied(fn()=>action($db,'seller','bid',['id'=>$id,'amount'=>1000]),'self bid');
+action($db,'buyer','bid',['id'=>$id,'amount'=>1000]);
+denied(fn()=>action($db,'other','bid',['id'=>$id,'amount'=>1000]),'stale bid rejected');
+denied(fn()=>action($db,'seller','deleteAuction',['id'=>$id]),'bid history preserved');
+$snap=snapshot($db,'other');ok(!str_contains(json_encode($snap),'PRIVATE_PASSWORD_HASH')&&!str_contains(json_encode($snap),'01099998888'),'private identity excluded');
+ok(!isset($snap['auctions'][0]['winnerId'])&&$snap['auctions'][0]['bidHistory']===[],'bidder hidden from other users');
+$room=action($db,'buyer','chat',['id'=>$id]);
+action($db,'buyer','send',['id'=>$room['id'],'text'=>'안녕하세요','requestId'=>'message-1']);
+action($db,'buyer','send',['id'=>$room['id'],'text'=>'안녕하세요','requestId'=>'message-1']);ok(count($db['messages'])===1,'message retry idempotent');
+denied(fn()=>action($db,'other','send',['id'=>$room['id'],'text'=>'몰래 읽기','requestId'=>'bad']),'room membership');
+ok(snapshot($db,'other')['chats']===[],'private room filtering');
+ok(snapshot($db,'seller')['chats'][0]['unread']===1,'unread recipient');
+action($db,'buyer','send',['id'=>$room['id'],'text'=>'두 번째 메시지','requestId'=>'message-2']);
+$db['messages']=array_reverse($db['messages'],true);
+ok(snapshot($db,'seller')['chats'][0]['messages'][0]['text']==='안녕하세요','database row order cannot reorder conversation');
+action($db,'seller','readRoom',['id'=>$room['id']]);ok(snapshot($db,'seller')['chats'][0]['unread']===0,'read receipt persisted');
+action($db,'seller','block',['id'=>'buyer','blocked'=>true]);
+denied(fn()=>action($db,'buyer','send',['id'=>$room['id'],'text'=>'차단 후 메시지','requestId'=>'bad2']),'block both directions');
+action($db,'seller','block',['id'=>'buyer','blocked'=>false]);
+$db['auctions'][$id]['endTime']=now_ms()-1;settle($db);settle($db);ok(count($db['trades'])===1,'settlement exactly once');
+denied(fn()=>action($db,'seller','advance',['id'=>$id]),'seller cannot confirm payment for buyer');
+action($db,'buyer','advance',['id'=>$id]);action($db,'seller','advance',['id'=>$id]);action($db,'buyer','advance',['id'=>$id]);
+action($db,'buyer','review',['id'=>$id,'rating'=>5,'text'=>'좋은 거래였습니다.']);
+member_ratings($db);ok($db['users']['seller']['rating']==5&&$db['users']['seller']['reviewCount']===1,'member rating and review count derived from completed reviews');
+action($db,'seller','settings',['values'=>['rating'=>1,'role'=>'admin']]);member_ratings($db);
+ok($db['users']['seller']['rating']==5&&$db['users']['seller']['role']==='member','members cannot self-edit ratings or privileges');
+denied(fn()=>action($db,'buyer','review',['id'=>$id,'rating'=>5,'text'=>'중복 후기입니다.']),'duplicate review');
+ok(snapshot($db,'other')['publicTrades']===[],'private trade history');
+action($db,'seller','settings',['values'=>['publicHistory'=>true,'showOnline'=>false,'dnd'=>['enabled'=>true,'start'=>'23:00','end'=>'08:00']]]);
+ok(count(snapshot($db,'other')['publicTrades'])===1,'opted in trade history');
+ok(snapshot($db,'buyer')['sellers']->seller['lastSeen']===null,'hidden presence');
+$db['users']['buyer']['status']='banned';denied(fn()=>action($db,'buyer','bid',['id'=>$id,'amount'=>1100]),'ban enforced');
+$ticket=action($db,'buyer','ticket',['title'=>'이용 제한 문의','body'=>'상황을 확인해 주세요.','type'=>'계정']);ok(isset($db['tickets'][$ticket]),'banned user can appeal');
+echo json_encode(['passed'=>$count,'fixture'=>snapshot($db,'seller')],JSON_UNESCAPED_UNICODE|JSON_THROW_ON_ERROR);

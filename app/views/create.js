@@ -26,7 +26,7 @@ const CreateView = {
         a ? "상품 수정" : "경매 등록",
         '<span class="step-label">좋은 물건, 새로운 시작</span>',
       ) +
-      '<div class="form-layout"><form id="product-form" class="form-card"><h2>어떤 물건을 판매하시나요?</h2><p class="muted">상태를 솔직하게 알려주시면 거래가 더 편해져요.</p><label class="field">상품 사진 <span class="required">*</span></label><div class="upload-grid" id="upload-grid"></div><p class="field-hint">최대 5장 · JPG, PNG, WEBP · 장당 5MB 이하</p><button type="button" class="text-button" id="sample-photo">사진 없이 체험하기 · 예시 사진 사용</button><label class="field">상품 제목 <span class="required">*</span><input name="title" maxlength="100" required placeholder="브랜드, 모델명과 상품의 특징을 적어주세요" value="' +
+      '<div class="form-layout"><form id="product-form" class="form-card"><h2>어떤 물건을 판매하시나요?</h2><p class="muted">상태를 솔직하게 알려주시면 거래가 더 편해져요.</p><label class="field">상품 사진 <span class="required">*</span></label><div class="upload-grid" id="upload-grid"></div><p class="field-hint">최대 5장 · JPG, PNG, WEBP · 장당 5MB 이하</p><label class="field">상품 제목 <span class="required">*</span><input name="title" maxlength="100" required placeholder="브랜드, 모델명과 상품의 특징을 적어주세요" value="' +
       esc(a?.title || "") +
       '"></label><div class="form-two"><label class="field">카테고리<select name="category">' +
       CATEGORIES.filter((c) => c.id !== "all")
@@ -64,7 +64,7 @@ const CreateView = {
       (a?.minStep || 1000) +
       '"></label></div>' +
       (!a
-        ? '<label class="field">경매 진행 시간<select name="duration"><option value="24">24시간</option><option value="48">48시간</option><option value="72">3일</option><option value="168">7일</option><option value="0.0166666667">1분 · 마감 테스트</option></select></label>'
+        ? '<label class="field">경매 진행 시간<select name="duration"><option value="24">24시간</option><option value="48">48시간</option><option value="72">3일</option><option value="168">7일</option></select></label>'
         : '<p class="field-hint">기존 마감 시간은 유지됩니다.</p>') +
       '<h2 class="form-section-title">거래 방법</h2><div class="form-two"><label class="field">선호 거래 지역<input name="location" maxlength="80" required value="' +
       esc(a?.location || Store.data.user.location) +
@@ -87,10 +87,10 @@ const CreateView = {
       icon("help") +
       "<p>입찰이 시작되면 상품의 조건을 수정하거나 삭제할 수 없어요.</p></div>" +
       (!Store.data.user.verified
-        ? '<button class="button secondary full" id="create-verify">데모 전화번호 인증하기</button>'
+        ? '<button class="button secondary full" id="create-verify">전화번호 인증하기</button>'
         : '<p class="text-green small">' +
           icon("check") +
-          "데모 전화번호 인증 완료</p>") +
+          "전화번호 인증 완료</p>") +
       "</aside></div>";
     const form = root.querySelector("#product-form");
     const updateSubs = () => {
@@ -110,17 +110,12 @@ const CreateView = {
     };
     updateSubs();
     form.elements.category.onchange = updateSubs;
-    root.querySelector("#sample-photo").onclick = () => {
-      this.images = [INITIAL_AUCTIONS[1].images[0]];
-      this.renderPhotos();
-      toast("예시 사진을 추가했어요.");
-    };
     root.querySelector("#create-verify")?.addEventListener("click", () =>
       Account.verify(() => {
         toast("인증을 완료했어요. 상품 등록을 계속해 주세요.");
       }),
     );
-    form.onsubmit = (e) => {
+    form.onsubmit = async (e) => {
       e.preventDefault();
       const error = root.querySelector("#create-error");
       error.textContent = "";
@@ -130,7 +125,7 @@ const CreateView = {
       }
       try {
         const v = Object.fromEntries(new FormData(form));
-        Store.saveAuction(
+        await Store.saveAuction(
           {
             ...v,
             startingPrice: Number(v.startingPrice),

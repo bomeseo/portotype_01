@@ -46,9 +46,24 @@ function isDnd(member, date = new Date()) {
   if (!member?.dnd?.enabled) return false;
   const { start, end } = member.dnd;
   const clock =
-    String(date.getHours()).padStart(2, "0") +
+    String(
+      Number(
+        date.toLocaleString("en-US", {
+          timeZone: "Asia/Seoul",
+          hour: "2-digit",
+          hourCycle: "h23",
+        }),
+      ),
+    ).padStart(2, "0") +
     ":" +
-    String(date.getMinutes()).padStart(2, "0");
+    String(
+      Number(
+        date.toLocaleString("en-US", {
+          timeZone: "Asia/Seoul",
+          minute: "2-digit",
+        }),
+      ),
+    ).padStart(2, "0");
   return (
     start === end ||
     (start < end
@@ -59,11 +74,13 @@ function isDnd(member, date = new Date()) {
 function presence(m) {
   return !m?.showOnline
     ? "접속 정보 비공개"
-    : m.demoOnline
-      ? "온라인 · 데모"
+    : m.lastSeen && Date.now() - m.lastSeen < 60000
+      ? "접속 중"
       : m.id === "me"
         ? "온라인"
-        : ago(m.lastSeen) + " 접속";
+        : m.lastSeen
+          ? ago(m.lastSeen) + " 접속"
+          : "접속 기록 없음";
 }
 function categoryName(id) {
   return CATEGORIES.find((c) => c.id === id)?.name || "기타";
@@ -79,7 +96,10 @@ function toast(message) {
 }
 function attempt(fn) {
   try {
-    return fn();
+    const result = fn();
+    if (result && typeof result.catch === "function")
+      return result.catch((e) => toast(e.message));
+    return result;
   } catch (e) {
     toast(e.message);
   }
