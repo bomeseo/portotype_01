@@ -2,6 +2,18 @@
 
 **DB 연결은 해결됐습니다. 이전 연결 오류를 처음부터 재조사하지 않습니다.**
 
+## 9월 10일 추가 진행
+
+- 닷홈 API 재확인: HTTP 200, JSON 응답, ok=true. 기존 DB 연결은 정상입니다.
+- 진단 PHP, tests/runtime.test.cjs, scripts/prepare-dothome.cjs, .openai/hosting.json, package.json은 여전히 HTTP 200입니다. 서버 정리는 미완료이며 점검 출력에 응답 내용이나 개인정보는 남기지 않았습니다.
+- 작업 중이던 API의 X-Bullty-Error 응답과 클라이언트 처리를 검증했습니다. 호스팅이 오류 본문을 HTML로 바꾸어도 검증 안내를 전달하고, 잘못된 헤더는 일반 오류 안내로 처리합니다. 실제 닷홈에서 헤더 유지 여부는 업로드 후 확인해야 합니다.
+- 배포용 .htaccess에 진단 파일·개발 경로 접근 제한을 추가했습니다. 기존 파일의 백업·웹 루트 밖 이동도 필요합니다. DB, 비공개 설정, 기존 uploads 사진은 보존합니다.
+- npm test: 11개 통과, PHP 런타임이 없어 실제 실행 검사 2개 생략. PHP 문법 분석 통과. npm run build 성공.
+- 전달용 파일: ../bullty-deploy/bullty-dothome-20260910.zip. dist 내용만 포함하며 비공개 DB 설정·관리자 비밀번호·개발 도구는 포함하지 않습니다.
+- FTP 접속 방법은 미확보입니다. 이번 수정은 배포 준비이며 닷홈 업로드 완료를 의미하지 않습니다. 파일질라 저장 여부를 사용자에게 질문한 상태입니다.
+
+아래는 9월 9일 검증 기록입니다.
+
 사이트: https://bullty.dothome.co.kr/
 저장소: https://github.com/bomeseo/portotype_01
 확인한 원격 main: `233a849`

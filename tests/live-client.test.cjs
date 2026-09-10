@@ -100,10 +100,45 @@ function harness(fetcher) {
   );
   return { c, document, run: (s) => vm.runInContext(s, c, { timeout: 2000 }) };
 }
+test("host HTML error pages preserve validation messages through a safe header", async () => {
+  const h = harness(async () => ({
+    ok: false,
+    headers: {
+      get: (name) =>
+        name === "x-bullty-error"
+          ? encodeURIComponent("이미 사용 중인 아이디입니다.")
+          : "text/html",
+    },
+    json: async () => {
+      throw Error("HTML must not be parsed as JSON");
+    },
+  }));
+  await assert.rejects(
+    h.run("Store.mutate('register')"),
+    /이미 사용 중인 아이디/,
+  );
+  assert.equal(h.run("Store.data.authenticated"), false);
+  assert.equal(h.run("Store.busy"), false);
+});
+
+test("malformed error headers fall back without hiding the connection error", async () => {
+  const h = harness(async () => ({
+    ok: false,
+    headers: {
+      get: (name) => (name === "x-bullty-error" ? "%ZZ" : "text/html"),
+    },
+  }));
+  await assert.rejects(h.run("Store.like(1)"), /연결 상태/);
+  assert.equal(h.run("Store.data.likes.length"), 0);
+  assert.equal(h.run("Store.busy"), false);
+});
+
 test("server failure never changes local state or reports a mutation as successful", async () => {
   const h = harness(async () => ({
     ok: false,
-    headers: { get: () => "application/json" },
+    headers: {
+      get: (name) => (name === "content-type" ? "application/json" : null),
+    },
     json: async () => ({ ok: false, error: "rejected" }),
   }));
   await assert.rejects(h.run("Store.like(1)"), /rejected/);

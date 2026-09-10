@@ -21,6 +21,18 @@ const Store = {
         body: op ? JSON.stringify({ op, ...values }) : undefined,
       });
       const contentType = response.headers.get("content-type") || "";
+      if (!response.ok) {
+        const encodedError = response.headers.get("x-bullty-error");
+        if (encodedError) {
+          let message;
+          try {
+            message = decodeURIComponent(encodedError);
+          } catch {
+            // A malformed proxy header must not hide the normal error handling.
+          }
+          if (message) throw new Error(message);
+        }
+      }
       if (!contentType.includes("application/json"))
         throw new Error(
           "요청을 처리하지 못했습니다. 연결 상태를 확인하고 다시 시도해 주세요.",

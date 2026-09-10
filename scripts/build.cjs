@@ -46,7 +46,7 @@ for (const file of [
 }
 fs.writeFileSync(
   path.join(output, ".htaccess"),
-  'Options -Indexes\n<FilesMatch "^(?:bullty-config\\.php|\\.env.*)$">\nRequire all denied\n</FilesMatch>\n',
+  'Options -Indexes\n<FilesMatch "^(?:bullty-config\\.php|bullty-check-.*\\.php|\\.env.*|package(?:-lock)?\\.json|agents\\.md|.*\\.(?:sql|cjs|tar|gz|zip))$">\nRequire all denied\n</FilesMatch>\n<IfModule mod_rewrite.c>\nRewriteEngine On\nRewriteRule ^(?:tests|scripts|node_modules|legacy|\\.git|\\.openai)(?:/|$) - [F,L,NC]\n</IfModule>\n',
 );
 console.log(
   "Included PHP endpoints and protected server files. Deploy this package only to a PHP host.",

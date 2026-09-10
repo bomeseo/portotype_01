@@ -91,6 +91,8 @@ try {
 } catch(Throwable $e) {
     if(isset($pdo)&&$pdo->inTransaction())$pdo->rollBack();
     http_response_code($e instanceof DomainException?400:503);
+    // Some hosts replace error bodies with HTML; preserve only safe user-facing validation messages.
+    if($e instanceof DomainException)header('X-Bullty-Error: '.rawurlencode($e->getMessage()));
     if(!($e instanceof DomainException))error_log('Bullty API: '.get_class($e));
     echo json_encode(['ok'=>false,'error'=>$e instanceof DomainException?$e->getMessage():'서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.'],JSON_UNESCAPED_UNICODE);
 }
